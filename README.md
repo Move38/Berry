@@ -25,6 +25,7 @@ THe game progresses with players taking turns until a player turns all 6 Blinks 
 (1)A piece is able to be moved if it does not have pieces on opposite sides, or if the piece can be removed without breaking the cluster into more than 2 parts (much like _Fracture_).  
 
 (2)Scoring System illustrated in ASCII :)
+```
  ___
 /    \ ___
 \____//   \
@@ -44,3 +45,4 @@ THe game progresses with players taking turns until a player turns all 6 Blinks 
 \___//    \\___/     = 3 points
      \____//   \
            \___/ 
+```
