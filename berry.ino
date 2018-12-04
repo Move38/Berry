@@ -99,14 +99,15 @@ void loop() {
 
   // check neighbors
   byte score = getScoreBasedOnNeighbors();
+  byte high_score = 0;
 
   // take the highest score so long as I am not 0
   if ( score > 0 ) {
-    score = max(score, getHighestNeighbor());
+    high_score  = max(score, getHighestNeighbor());
   }
 
   // show score if score applicable
-  for (byte i = 0; i < score; i++) {
+  for (byte i = 0; i < high_score; i++) {
     setColorOnFace(GREEN, i);
   }
 
