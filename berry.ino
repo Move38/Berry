@@ -98,12 +98,21 @@ void loop() {
   }
 
   // check neighbors
-  getScoreBasedOnNeighbors();
-  
+  byte score = getScoreBasedOnNeighbors();
+
+  // take the highest score so long as I am not 0
+  if ( score > 0 ) {
+    score = max(score, getHighestNeighbor());
+  }
+
   // show score if score applicable
+  for (byte i = 0; i < score; i++) {
+    setColorOnFace(GREEN, i);
+  }
 
   // message my index
-  setValueSentOnAllFaces(currentColorIndex);
+  byte data = (score << 2) + currentColorIndex;
+  setValueSentOnAllFaces(data);
 }
 
 byte getNeighborColor(byte d) {
@@ -114,9 +123,22 @@ byte getNeighborScore(byte d) {
   return ((d >> 2) & 3);
 }
 
+byte getHighestNeighbor() {
+  byte high_score = 0;
+  FOREACH_FACE(f) {
+    if (!isValueReceivedOnFaceExpired(f)) {
+      byte data = getLastValueReceivedOnFace(f);
+      if (getNeighborScore(data) > high_score) {
+        high_score = getNeighborScore(data);
+      }
+    }
+  }
+  return high_score;
+}
+
 byte getScoreBasedOnNeighbors() {
 
-  bool sameColor[6] = {0,0,0,0,0,0};
+  bool sameColor[6] = {0, 0, 0, 0, 0, 0};
   byte numSameColor = 0;
 
   // fill the same color array with same color neighbors
@@ -132,40 +154,29 @@ byte getScoreBasedOnNeighbors() {
 
   // look at the same color neighbor array and determine possible score
   if ( numSameColor < 2 ) {
-    return;
+    return 0;
   }
 
   // two adjacent -> 1 point
   // two pair of 2 adjacent with 1 in between -> 2 points
   // three adjacent -> 2 points
   // four adjacent -> 3 points
-  
-  if ( isThisPatternPresent( one_a, sameColor) ) {
-    setColorOnFace(GREEN, 0);
+
+  if ( isThisPatternPresent( one_a, sameColor) ||
+       isThisPatternPresent( one_b, sameColor) ||
+       isThisPatternPresent( one_c, sameColor) ) {
+    return 1;
   }
-  else if ( isThisPatternPresent( one_b, sameColor) ) {
-    setColorOnFace(GREEN, 0);
-  }
-  else if ( isThisPatternPresent( one_c, sameColor) ) {
-    setColorOnFace(GREEN, 0);
-  }
-  else if ( isThisPatternPresent( two_a, sameColor) ) {
-    setColorOnFace(GREEN, 0);
-    setColorOnFace(GREEN, 1);
-  }
-  else if ( isThisPatternPresent( two_b, sameColor) ) {
-    setColorOnFace(GREEN, 0);
-    setColorOnFace(GREEN, 1);
-  }
-  else if ( isThisPatternPresent( two_c, sameColor) ) {
-    setColorOnFace(GREEN, 0);
-    setColorOnFace(GREEN, 1);
+  else if ( isThisPatternPresent( two_a, sameColor) ||
+            isThisPatternPresent( two_b, sameColor) ||
+            isThisPatternPresent( two_c, sameColor) ) {
+    return 2;
   }
   else if ( isThisPatternPresent( three, sameColor) ) {
-    setColorOnFace(GREEN, 0);
-    setColorOnFace(GREEN, 1);
-    setColorOnFace(GREEN, 2);
+    return 3;
   }
+
+  return 0;
 }
 
 // check to see if pattern is in the array
