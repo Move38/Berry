@@ -30,6 +30,10 @@ bool isWaiting = false;
 Timer faceTimer;
 Timer waitTimer;
 
+uint32_t timeOfScore = 0;
+bool setTimeOfScore = false;
+byte prevScore = 0;
+
 //110000  -> 1 point
 //110100  -> 1 point
 //110010  -> 1 point
@@ -91,8 +95,9 @@ void loop() {
   setColor( colors[currentColorIndex] );
 
   // show next color
+  byte nextColorIndex = (currentColorIndex + 1) % 3;
+
   if (!isWaiting) {
-    byte nextColorIndex = (currentColorIndex + 1) % 3;
     byte face = (faceStartIndex + faceIndex - 1) % FACE_COUNT;
     setFaceColor( face, colors[nextColorIndex] );
   }
@@ -104,11 +109,34 @@ void loop() {
   // take the highest score so long as I am not 0
   if ( score > 0 ) {
     high_score  = max(score, getHighestNeighbor());
+
+    if (!setTimeOfScore) {
+      setTimeOfScore = true;
+      timeOfScore = millis();
+    }
+  }
+
+  if (prevScore != high_score) {
+    setTimeOfScore = false;
+    prevScore = high_score;
   }
 
   // show score if score applicable
-  for (byte i = 0; i < high_score; i++) {
-    setColorOnFace(GREEN, i);
+  // for a short duration
+  if (millis() - timeOfScore < 8 * 255) {
+    for (byte i = 0; i < high_score; i++) {
+      if ((millis() - timeOfScore) < 4 * 255) { // fade down
+        byte bri = 255 - (millis() - timeOfScore) / 4;
+        setColorOnFace(dim(colors[nextColorIndex], bri), i);
+      }
+      else { // fade up
+        byte bri = (millis() - timeOfScore - 4*255) / 4;
+        setColorOnFace(dim(colors[currentColorIndex], bri), i);
+      }
+    }
+    waitTimer.set( WAIT_DURATION );
+    isWaiting = true;
+    faceIndex = 0;
   }
 
   // message my index
