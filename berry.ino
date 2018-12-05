@@ -67,6 +67,7 @@ void loop() {
       currentColorIndex = 0;
     }
 
+    setTimeOfScore = false;
   }
 
   if ( waitTimer.isExpired() ) {
@@ -116,7 +117,7 @@ void loop() {
     }
   }
 
-  if (prevScore != high_score) {
+  if ( prevScore != high_score ) {
     setTimeOfScore = false;
     prevScore = high_score;
   }
@@ -124,16 +125,30 @@ void loop() {
   // show score if score applicable
   // for a short duration
   if (millis() - timeOfScore < 8 * 255) {
-    for (byte i = 0; i < high_score; i++) {
-      if ((millis() - timeOfScore) < 4 * 255) { // fade down
-        byte bri = 255 - (millis() - timeOfScore) / 4;
-        setColorOnFace(dim(colors[nextColorIndex], bri), i);
-      }
-      else { // fade up
-        byte bri = (millis() - timeOfScore - 4*255) / 4;
-        setColorOnFace(dim(colors[currentColorIndex], bri), i);
+
+    // TODO: Instead of lighting up the number of the score
+    // light up the faces with neighbors that are scoring
+
+    FOREACH_FACE(f) {
+      
+      if (!isValueReceivedOnFaceExpired(f)) {
+        
+        byte data = getLastValueReceivedOnFace(f);
+        
+        if ( getNeighborScore(data) > 0 && getNeighborColor(data) == currentColorIndex) {
+
+          if ((millis() - timeOfScore) < 4 * 255) { // fade down
+            byte bri = 255 - (millis() - timeOfScore) / 4;
+            setColorOnFace(dim(colors[nextColorIndex], bri), f);
+          }
+          else { // fade up
+            byte bri = (millis() - timeOfScore - 4 * 255) / 4;
+            setColorOnFace(dim(colors[currentColorIndex], bri), f);
+          }
+        }
       }
     }
+
     waitTimer.set( WAIT_DURATION );
     isWaiting = true;
     faceIndex = 0;
