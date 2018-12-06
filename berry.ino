@@ -30,6 +30,10 @@ bool isWaiting = false;
 Timer faceTimer;
 Timer waitTimer;
 
+bool wasAlone = false;
+bool prevNeighbors[6];
+bool isWaitingForTouch = false;
+
 void setup() {
   // put your setup code here, to run once:
 
@@ -60,7 +64,7 @@ void loop() {
 
         // shift the starting point
         faceStartIndex++;
-        if(faceStartIndex >= 6) {
+        if (faceStartIndex >= 6) {
           faceStartIndex = 0;
         }
       }
@@ -70,6 +74,39 @@ void loop() {
     }
   }
 
+  // special case where we attach to 3 Blinks
+  if (wasAlone && !isAlone()) {
+    // TODO: wait for 500ms to make sure you see all attached Blinks
+    byte numNeighbors = 0;
+    FOREACH_FACE(f) {
+      if (!isValueReceivedOnFaceExpired(f)) {
+        // we have a neighbor where we didn't used to
+        numNeighbors++;
+      }
+    }
+    if (numNeighbors == 3) {
+      // then I need touch
+      isWaitingForTouch = true;
+    }
+  }
+  else {
+    // I wasn't alone, I am part of the board
+    FOREACH_FACE(f) {
+      if (!isValueReceivedOnFaceExpired(f)) {
+        if (prevNeighbors[f] == false) {
+          // we have a neighbor where we didn't used to
+          isWaitingForTouch = true;
+        }
+        prevNeighbors[f] = true;
+      }
+      else {
+        prevNeighbors[f] = false;
+      }
+    }
+  }
+
+  wasAlone = isAlone();  
+
   // display color
   setColor( colors[currentColorIndex] );
 
@@ -78,5 +115,10 @@ void loop() {
     byte nextColorIndex = (currentColorIndex + 1) % 3;
     byte face = (faceStartIndex + faceIndex - 1) % FACE_COUNT;
     setFaceColor( face, colors[nextColorIndex] );
+  }
+
+  // show it needs to be tapped
+  if(isWaitingForTouch) {
+    setColorOnFace(WHITE, 0);
   }
 }
