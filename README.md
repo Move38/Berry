@@ -7,8 +7,8 @@ _INSERT GIF OF GAMEPLAY_
 |------------------|:-----------------:|:--------------------:|-----------------:|
 | 6                | 2                 |  5 - 15 minutes      | 12 & Up          |
 
-## Objective
-Berry is a two-player competitive abstract strategy game. The goal is to make all Blinks a single color on your turn, or be the first to score 10 points<sup>[1](#footnote1)</sup>. 
+
+Berry is a two-player competitive abstract strategy game. The goal is to make all Blinks a single color on your turn, or be the first to score 10 points. 
 
 ## Setup
 Each player starts with 3 blue tiles in their hand. (Note: blue tiles will signal that red is the next color in line)
