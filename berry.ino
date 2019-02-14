@@ -60,7 +60,7 @@ void loop() {
 
         // shift the starting point
         faceStartIndex++;
-        if(faceStartIndex >= 6) {
+        if (faceStartIndex >= 6) {
           faceStartIndex = 0;
         }
       }
@@ -74,14 +74,10 @@ void loop() {
   setColor( colors[currentColorIndex] );
 
   // show locked sides
-  if(isPositionLocked()) {
-    FOREACH_FACE(f) {
-      if(!isValueReceivedOnFaceExpired(f)) {
-        // show the state of locked animation
-        byte bri = 155 + (50 * sin_d((millis()/4) % 360));
-        setColorOnFace(dim(colors[currentColorIndex], bri), f);
-      }
-    }
+  if (isPositionLocked()) {
+    // show the state of locked animation on all faces
+    byte bri = 155 + (50 * sin_d((millis() / 4) % 360));
+    setColor(dim(colors[currentColorIndex], bri));
   }
 
   // show next color
@@ -95,25 +91,25 @@ void loop() {
 bool isPositionLocked() {
   // based on the arrangement of neighbors, am I locked...
   bool neighborPattern[6];
-  bool lockedA[6] = {1,0,1,0,1,0};
-  bool lockedB[6] = {1,0,1,0,0,0};
-  
-  FOREACH_FACE(f){
+  bool lockedA[6] = {1, 0, 1, 0, 1, 0};
+  bool lockedB[6] = {1, 0, 1, 0, 0, 0};
+
+  FOREACH_FACE(f) {
     neighborPattern[f] = !isValueReceivedOnFaceExpired(f);
   }
 
   // neighbors across from each other
-  for(byte i=0; i<3; i++) {
-    if(neighborPattern[i] && neighborPattern[i+3]) {
+  for (byte i = 0; i < 3; i++) {
+    if (neighborPattern[i] && neighborPattern[i + 3]) {
       return true;
     }
   }
-  
+
   // special case lock patterns
-  if( isThisPatternPresent(lockedA, neighborPattern)) {
+  if ( isThisPatternPresent(lockedA, neighborPattern)) {
     return true;
   }
-  if( isThisPatternPresent(lockedB, neighborPattern)) {
+  if ( isThisPatternPresent(lockedB, neighborPattern)) {
     return true;
   }
 
