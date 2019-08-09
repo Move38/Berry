@@ -1,21 +1,20 @@
 /*
-   Assumed implementation for BeRrY
-
-   designed by ViVi and Vanilla
-   at IndieCade East 2018 Game Jam
-
-   Blinks rotate color with button press.
-   BLUE -> RED-> YELLOW -> BLUE...
-
-   code by:
-   Jonathan Bobrow
-   2.23.2018
-
-   Beginner mode: show the next color with a single pixel spinning every 2 seconds
-   TODO: Sync the colors so they rotate the next color together
-   TODO: Desync different colors so they happen in sequence
-
-*/
+ *  Berry
+ *  by VV Studio
+ *  at IndieCade East 2018 Game Jam
+ *  Lead development by Jonathan Bobrow, Move38 Inc.
+ *  original game by ViVi and Vanilla
+ *
+ *  Rules: https://github.com/Move38/Berry/blob/master/README.md
+ *
+ *  --------------------
+ *  Blinks by Move38
+ *  Brought to life via Kickstarter 2018
+ *
+ *  @madewithblinks
+ *  www.move38.com
+ *  --------------------
+ */
 
 Color colors[] = { BLUE, RED, YELLOW };
 byte currentColorIndex = 0;
@@ -60,7 +59,7 @@ void loop() {
 
         // shift the starting point
         faceStartIndex++;
-        if(faceStartIndex >= 6) {
+        if (faceStartIndex >= 6) {
           faceStartIndex = 0;
         }
       }
@@ -73,10 +72,89 @@ void loop() {
   // display color
   setColor( colors[currentColorIndex] );
 
+  // show locked sides
+  if (isPositionLocked()) {
+    // show the state of locked animation on all faces
+    byte bri = 155 + (50 * sin_d((millis() / 4) % 360));
+    setColor(dim(colors[currentColorIndex], bri));
+  }
+
   // show next color
   if (!isWaiting) {
     byte nextColorIndex = (currentColorIndex + 1) % 3;
     byte face = (faceStartIndex + faceIndex - 1) % FACE_COUNT;
     setFaceColor( face, colors[nextColorIndex] );
   }
+}
+
+bool isPositionLocked() {
+  // based on the arrangement of neighbors, am I locked...
+  bool neighborPattern[6];
+  bool lockedA[6] = {1, 0, 1, 0, 1, 0};
+  bool lockedB[6] = {1, 0, 1, 0, 0, 0};
+
+  FOREACH_FACE(f) {
+    neighborPattern[f] = !isValueReceivedOnFaceExpired(f);
+  }
+
+  // neighbors across from each other
+  for (byte i = 0; i < 3; i++) {
+    if (neighborPattern[i] && neighborPattern[i + 3]) {
+      return true;
+    }
+  }
+
+  // special case lock patterns
+  if ( isThisPatternPresent(lockedA, neighborPattern)) {
+    return true;
+  }
+  if ( isThisPatternPresent(lockedB, neighborPattern)) {
+    return true;
+  }
+
+  return false;
+}
+
+// check to see if pattern is in the array
+// return true if the pattern is in fact in the array
+// pattern is always 6 bools
+// source is always 12 bools (2 x 6 bools)
+bool isThisPatternPresent( bool pat[], bool source[]) {
+
+  // first double the source to be cyclical
+  bool source_double[12];
+
+  for (byte i = 0; i < 12; i++) {
+    source_double[i] = source[i % 6];
+  }
+
+  // then find the pattern
+  byte pat_index = 0;
+
+  for (byte i = 0; i < 12; i++) {
+    if (source_double[i] == pat[pat_index]) {
+      // increment index
+      pat_index++;
+
+      if ( pat_index == 6 ) {
+        // found the entire pattern
+        return true;
+      }
+    }
+    else {
+      // set index back to 0
+      pat_index = 0;
+    }
+  }
+
+  return false;
+}
+
+/*
+   Sin in degrees ( standard sin() takes radians )
+*/
+
+float sin_d( uint16_t degrees ) {
+
+  return sin( ( degrees / 360.0F ) * 2.0F * PI   );
 }
