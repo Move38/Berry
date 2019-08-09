@@ -1,21 +1,20 @@
 /*
-   Assumed implementation for BeRrY
-
-   designed by ViVi and Vanilla
-   at IndieCade East 2018 Game Jam
-
-   Blinks rotate color with button press.
-   BLUE -> RED-> YELLOW -> BLUE...
-
-   code by:
-   Jonathan Bobrow
-   2.23.2018
-
-   Beginner mode: show the next color with a single pixel spinning every 2 seconds
-   TODO: Sync the colors so they rotate the next color together
-   TODO: Desync different colors so they happen in sequence
-
-*/
+ *  Berry
+ *  by VV Studio
+ *  at IndieCade East 2018 Game Jam
+ *  Lead development by Jonathan Bobrow, Move38 Inc.
+ *  original game by ViVi and Vanilla
+ *
+ *  Rules: https://github.com/Move38/Berry/blob/master/README.md
+ *
+ *  --------------------
+ *  Blinks by Move38
+ *  Brought to life via Kickstarter 2018
+ *
+ *  @madewithblinks
+ *  www.move38.com
+ *  --------------------
+ */
 
 Color colors[] = { BLUE, RED, YELLOW };
 byte currentColorIndex = 0;
